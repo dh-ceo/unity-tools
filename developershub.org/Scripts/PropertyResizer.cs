@@ -1,4 +1,4 @@
-﻿//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
 // Author  : Armin Ahmadi
 // Email   : developershub.organization@gmail.com
 // Website : www.developershub.org
@@ -9,14 +9,12 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
 
 namespace DevelopersHub.Unity.Tools
 {
-    #if UNITY_EDITOR
-    [ExecuteInEditMode] 
-    #endif
     public class PropertyResizer : MonoBehaviour
     {
 
@@ -44,23 +42,6 @@ namespace DevelopersHub.Unity.Tools
         {
             SetSize();
         }
-
-        #if UNITY_EDITOR
-        private float timer = 0;
-        private float period = 1;
-        private void Update()
-        {
-            if(timer >= period)
-            {
-                SetSize();
-                timer = 0;
-            }
-            else
-            {
-                timer += Time.deltaTime;
-            }
-        }
-        #endif
 
         private void SetSize()
         {
@@ -108,6 +89,11 @@ namespace DevelopersHub.Unity.Tools
                     }
                 }
             }
+        }
+
+        public void ResetUi()
+        {
+            SetSize();
         }
 
     }
