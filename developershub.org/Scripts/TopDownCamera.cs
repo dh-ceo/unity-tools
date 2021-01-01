@@ -56,7 +56,12 @@ namespace DevelopersHub.Unity.Tools
         private float autoMoveSpeed = 1;
         private float autoZoomTarget = 1;
         private float autoZoomSpeed = 1;
-
+        
+        public void ChangeCenter(Vector3 center)
+        {
+            moveCenter = center;
+        }
+        
         public void ChangeMoveLimits(float limitRight, float limitLeft, float limitUp, float LimitDown)
         {
             moveLimitRight = limitRight;
