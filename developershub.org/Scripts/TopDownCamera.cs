@@ -1,4 +1,4 @@
-﻿//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
 // Author  : Armin Ahmadi
 // Email   : developershub.organization@gmail.com
 // Website : www.developershub.org
@@ -56,6 +56,21 @@ namespace DevelopersHub.Unity.Tools
         private float autoMoveSpeed = 1;
         private float autoZoomTarget = 1;
         private float autoZoomSpeed = 1;
+
+        public void ChangeMoveLimits(float limitRight, float limitLeft, float limitUp, float LimitDown)
+        {
+            moveLimitRight = limitRight;
+            moveLimitLeft = limitLeft;
+            moveLimitUp = limitUp;
+            moveLimitDown = LimitDown;
+        }
+
+        public void ChangeZoomLimits(float normal, float min, float max)
+        {
+            zoomDefault = normal;
+            zoomMin = min;
+            zoomMax = max;
+        }
 
         private void Start()
         {
@@ -285,15 +300,48 @@ namespace DevelopersHub.Unity.Tools
 
         private void Auto()
         {
-            bool a = false;
+            bool ax = false;
+            bool ay = false;
             bool b = false;
+            float h = _camera.orthographicSize;
+            float w = _camera.aspect * h;
             if (_camera.transform.position != autoMoveTarget)
             {
                 _camera.transform.position = AdvancedFunctions.LerpVector3(_camera.transform.position, autoMoveTarget, autoMoveSpeed);
+                float x = _camera.transform.position.x;
+                float y = _camera.transform.position.y;
+                if (moveLimit)
+                {
+                    if (x > moveCenter.x + moveLimitRight - w)
+                    {
+                        x = moveCenter.x + moveLimitRight - w;
+                        ax = true;
+                    }
+                    if (x < moveCenter.x - moveLimitLeft + w)
+                    {
+                        x = moveCenter.x - moveLimitLeft + w;
+                        ax = true;
+                    }
+                    if (y > moveCenter.y + moveLimitUp - h)
+                    {
+                        y = moveCenter.y + moveLimitUp - h;
+                        ay = true;
+                    }
+                    if (y < moveCenter.y - moveLimitDown + h)
+                    {
+                        y = moveCenter.y - moveLimitDown + h;
+                        ay = true;
+                    }
+                }
+                _camera.transform.position = new Vector3(x, y, moveCenter.z);
             }
-            else
+            if(Mathf.Abs(_camera.transform.position.x - autoMoveTarget.x) <= 0.01f)
             {
-                a = true;
+                ax = true;
+            }
+            if (Mathf.Abs(_camera.transform.position.y - autoMoveTarget.y) <= 0.01f)
+            {
+                ay = true;
             }
             if (_camera.orthographicSize != autoZoomTarget)
             {
@@ -303,7 +351,7 @@ namespace DevelopersHub.Unity.Tools
             {
                 b = true;
             }
-            if(a && b)
+            if(ax && ay && b)
             {
                 auto = false;
             }
@@ -315,14 +363,55 @@ namespace DevelopersHub.Unity.Tools
         /// <param name="target">Position which you want to move to.</param>
         /// <param name="zoom">Zoom amount that you want to reach.</param>
         /// <param name="moveSpeed">Move speed multiplier.</param>
-        /// <param name="zoomSpeed">Zoom speed multiplier.</param>
-        public void GoTo(Vector2 target, float zoom, float moveSpeed = 1.2f, float zoomSpeed = 0.5f)
+        /// <param name="zoomSpeed">Zoom speed multiplier. Zero for default value.</param>
+        public void LerpTo(Vector2 target, float zoom = 0, float moveSpeed = 1.2f, float zoomSpeed = 0.5f)
         {
-            autoMoveTarget = new Vector3(autoMoveTarget.x, autoMoveTarget.y, moveCenter.z);
-            autoZoomTarget = zoom;
+            autoMoveTarget = new Vector3(target.x, target.y, moveCenter.z);
+            autoZoomTarget = (zoom == 0) ? zoomDefault : zoom;
             autoMoveSpeed = moveSpeed;
             autoZoomSpeed = zoomSpeed;
             auto = true;
+            moving = false;
+            moveInput = Vector2.zero;
+            zoomInput = 0;
+        }
+
+        /// <summary>
+        /// Immediately jump on target point.
+        /// </summary>
+        /// <param name="target">Position which you want to jump on.</param>
+        /// <param name="zoom">Zoom amount that you want to have.</param>
+        public void JumpTo(Vector2 target, float zoom = 0)
+        {
+            Vector3 point = new Vector3(target.x, target.y, moveCenter.z);
+            float h = (zoom == 0) ? zoomDefault : zoom;
+            moving = false;
+            moveInput = Vector2.zero;
+            zoomInput = 0;
+            float w = _camera.aspect * h;
+            _camera.orthographicSize = h;
+            float x = target.x;
+            float y = target.y;
+            if (moveLimit)
+            {
+                if (x > moveCenter.x + moveLimitRight - w)
+                {
+                    x = moveCenter.x + moveLimitRight - w;
+                }
+                if (x < moveCenter.x - moveLimitLeft + w)
+                {
+                    x = moveCenter.x - moveLimitLeft + w;
+                }
+                if (y > moveCenter.y + moveLimitUp - h)
+                {
+                    y = moveCenter.y + moveLimitUp - h;
+                }
+                if (y < moveCenter.y - moveLimitDown + h)
+                {
+                    y = moveCenter.y - moveLimitDown + h;
+                }
+            }
+            _camera.transform.position = new Vector3(x, y, moveCenter.z);
         }
 
     }
